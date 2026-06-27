@@ -71,29 +71,27 @@ async function bootstrap() {
     try {
       // 1. sagas
       await sequelize.query(`
-        INSERT INTO read_model.sagas (id, name, description, "order", is_active, "createdAt", "updatedAt", "deletedAt")
-        SELECT id, name, description, "order", is_active, "createdAt", "updatedAt", "deletedAt"
+        INSERT INTO read_model.sagas (id, name, description, "order", "createdAt", "updatedAt", "deletedAt")
+        SELECT id, name, description, "order", "createdAt", "updatedAt", "deletedAt"
         FROM public.sagas
         ON CONFLICT (id) DO UPDATE SET
           name = EXCLUDED.name,
           description = EXCLUDED.description,
           "order" = EXCLUDED."order",
-          is_active = EXCLUDED.is_active,
           "createdAt" = EXCLUDED."createdAt",
           "updatedAt" = EXCLUDED."updatedAt",
           "deletedAt" = EXCLUDED."deletedAt";
       `);
       // 2. arcs
       await sequelize.query(`
-        INSERT INTO read_model.arcs (id, name, description, saga_id, "order", is_active, "createdAt", "updatedAt", "deletedAt")
-        SELECT id, name, description, saga_id, "order", is_active, "createdAt", "updatedAt", "deletedAt"
+        INSERT INTO read_model.arcs (id, name, description, saga_id, "order", "createdAt", "updatedAt", "deletedAt")
+        SELECT id, name, description, saga_id, "order", "createdAt", "updatedAt", "deletedAt"
         FROM public.arcs
         ON CONFLICT (id) DO UPDATE SET
           name = EXCLUDED.name,
           description = EXCLUDED.description,
           saga_id = EXCLUDED.saga_id,
           "order" = EXCLUDED."order",
-          is_active = EXCLUDED.is_active,
           "createdAt" = EXCLUDED."createdAt",
           "updatedAt" = EXCLUDED."updatedAt",
           "deletedAt" = EXCLUDED."deletedAt";
@@ -131,9 +129,9 @@ async function bootstrap() {
           "updatedAt" = EXCLUDED."updatedAt",
           "deletedAt" = EXCLUDED."deletedAt";
       `);
-      // 5. characters
+      // 5. character_reads
       await sequelize.query(`
-        INSERT INTO read_model.characters (id, name, slug, "createdAt", "updatedAt", "deletedAt")
+        INSERT INTO read_model.character_reads (id, name, slug, "createdAt", "updatedAt", "deletedAt")
         SELECT id, name, slug, "createdAt", "updatedAt", "deletedAt"
         FROM public.characters
         ON CONFLICT (id) DO UPDATE SET
