@@ -4,7 +4,18 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     const now = new Date();
 
-    // 1. Sagas (Inserindo Saga East Blue caso não exista, ID 1)
+    // Limpar dados existentes antes de inserir para garantir que as novas descrições detalhadas sejam aplicadas
+    await queryInterface.bulkDelete('event_participants', null, {});
+    await queryInterface.bulkDelete('events', null, {});
+    await queryInterface.bulkDelete('arc_character_versions', null, {});
+    await queryInterface.bulkDelete('character_versions', null, {});
+    await queryInterface.bulkDelete('characters', null, {});
+    await queryInterface.bulkDelete('arc_islands', null, {});
+    await queryInterface.bulkDelete('islands', null, {});
+    await queryInterface.bulkDelete('arcs', null, {});
+    await queryInterface.bulkDelete('sagas', null, {});
+
+    // 1. Sagas
     await queryInterface.bulkInsert('sagas', [
       {
         id: 1,
