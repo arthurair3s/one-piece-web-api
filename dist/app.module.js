@@ -51,6 +51,7 @@ exports.AppModule = AppModule = __decorate([
                     username: configService.get('DB_USERNAME'),
                     password: configService.get('DB_PASSWORD'),
                     database: configService.get('DB_DATABASE'),
+                    schema: configService.get('DB_SCHEMA', 'public'),
                     autoLoadModels: true,
                     synchronize: false,
                 })
@@ -66,6 +67,7 @@ exports.AppModule = AppModule = __decorate([
                     username: configService.get('DB_USERNAME'),
                     password: configService.get('DB_PASSWORD'),
                     database: configService.get('DB_DATABASE_READ'),
+                    schema: configService.get('DB_SCHEMA_READ', 'public'),
                     autoLoadModels: true,
                     synchronize: true,
                 }),
