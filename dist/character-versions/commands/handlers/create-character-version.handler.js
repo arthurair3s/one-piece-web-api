@@ -36,22 +36,29 @@ let CreateCharacterVersionHandler = class CreateCharacterVersionHandler {
         if (!character) {
             throw new common_1.NotFoundException(`Personagem com ID ${character_id} não encontrado`);
         }
-        return this.sequelize.transaction(async (t) => {
-            const version = await this.characterVersionModel.create({
-                character_id,
-                ...versionData,
-            }, { transaction: t });
-            if (arc_ids && arc_ids.length > 0) {
-                const pivots = arc_ids.map(arc_id => ({
-                    arc_id,
-                    character_version_id: version.id,
+        try {
+            return await this.sequelize.transaction(async (t) => {
+                const version = await this.characterVersionModel.create({
                     character_id,
-                    order: 0,
-                }));
-                await this.pivotModel.bulkCreate(pivots, { transaction: t });
+                    ...versionData,
+                }, { transaction: t });
+                if (arc_ids && arc_ids.length > 0) {
+                    const pivots = arc_ids.map(arc_id => ({
+                        arc_id,
+                        character_version_id: version.id,
+                        character_id,
+                        order: 0,
+                    }));
+                    await this.pivotModel.bulkCreate(pivots, { transaction: t });
+                }
+            });
+        }
+        catch (error) {
+            if (error.name === 'SequelizeUniqueConstraintError') {
+                throw new common_1.BadRequestException('Este personagem já possui outra versão vinculada a um dos arcos selecionados. Um personagem não pode aparecer duas vezes no mesmo arco.');
             }
-            return version;
-        });
+            throw error;
+        }
     }
 };
 exports.CreateCharacterVersionHandler = CreateCharacterVersionHandler;

@@ -19,13 +19,15 @@ const common_1 = require("@nestjs/common");
 const get_character_version_query_1 = require("../impl/get-character-version.query");
 const character_version_model_1 = require("../../models/character-version.model");
 const character_model_1 = require("../../../characters/models/character.model");
+const arc_model_1 = require("../../../arcs/models/arc.model");
+const event_model_1 = require("../../../events/models/event.model");
 let GetCharacterVersionHandler = class GetCharacterVersionHandler {
     constructor(characterVersionModel) {
         this.characterVersionModel = characterVersionModel;
     }
     async execute(query) {
         const version = await this.characterVersionModel.findByPk(query.id, {
-            include: [character_model_1.Character]
+            include: [character_model_1.Character, arc_model_1.Arc, event_model_1.Event]
         });
         if (!version) {
             throw new common_1.NotFoundException(`CharacterVersion com ID ${query.id} não encontrada`);

@@ -14,6 +14,7 @@ const character_version_model_1 = require("./models/character-version.model");
 const character_model_1 = require("../characters/models/character.model");
 const arc_model_1 = require("../arcs/models/arc.model");
 const arc_character_version_model_1 = require("../arcs/models/arc-character-version.model");
+const event_participant_model_1 = require("../events/models/event-participant.model");
 const character_versions_service_1 = require("./character-versions.service");
 const character_versions_controller_1 = require("./character-versions.controller");
 const create_character_version_handler_1 = require("./commands/handlers/create-character-version.handler");
@@ -27,7 +28,7 @@ let CharacterVersionsModule = class CharacterVersionsModule {
 exports.CharacterVersionsModule = CharacterVersionsModule;
 exports.CharacterVersionsModule = CharacterVersionsModule = __decorate([
     (0, common_1.Module)({
-        imports: [cqrs_1.CqrsModule, sequelize_1.SequelizeModule.forFeature([character_version_model_1.CharacterVersion, character_model_1.Character, arc_model_1.Arc, arc_character_version_model_1.ArcCharacterVersion])],
+        imports: [cqrs_1.CqrsModule, sequelize_1.SequelizeModule.forFeature([character_version_model_1.CharacterVersion, character_model_1.Character, arc_model_1.Arc, arc_character_version_model_1.ArcCharacterVersion, event_participant_model_1.EventParticipant])],
         controllers: [character_versions_controller_1.CharacterVersionsController],
         providers: [
             character_versions_service_1.CharacterVersionsService,

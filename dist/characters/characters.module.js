@@ -11,6 +11,7 @@ const common_1 = require("@nestjs/common");
 const cqrs_1 = require("@nestjs/cqrs");
 const sequelize_1 = require("@nestjs/sequelize");
 const character_model_1 = require("./models/character.model");
+const character_version_model_1 = require("../character-versions/models/character-version.model");
 const characters_service_1 = require("./characters.service");
 const characters_controller_1 = require("./characters.controller");
 const create_character_handler_1 = require("./commands/handlers/create-character.handler");
@@ -24,7 +25,7 @@ let CharactersModule = class CharactersModule {
 exports.CharactersModule = CharactersModule;
 exports.CharactersModule = CharactersModule = __decorate([
     (0, common_1.Module)({
-        imports: [cqrs_1.CqrsModule, sequelize_1.SequelizeModule.forFeature([character_model_1.Character])],
+        imports: [cqrs_1.CqrsModule, sequelize_1.SequelizeModule.forFeature([character_model_1.Character, character_version_model_1.CharacterVersion])],
         controllers: [characters_controller_1.CharactersController],
         providers: [
             characters_service_1.CharactersService,

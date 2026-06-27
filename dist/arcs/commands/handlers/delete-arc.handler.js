@@ -19,10 +19,14 @@ const common_1 = require("@nestjs/common");
 const delete_arc_command_1 = require("../impl/delete-arc.command");
 const arc_model_1 = require("../../models/arc.model");
 const island_model_1 = require("../../../islands/models/island.model");
+const arc_character_version_model_1 = require("../../models/arc-character-version.model");
+const sequelize_typescript_1 = require("sequelize-typescript");
 let DeleteArcHandler = class DeleteArcHandler {
-    constructor(arcModel, islandModel) {
+    constructor(arcModel, islandModel, arcCharacterVersionModel, sequelize) {
         this.arcModel = arcModel;
         this.islandModel = islandModel;
+        this.arcCharacterVersionModel = arcCharacterVersionModel;
+        this.sequelize = sequelize;
     }
     async execute(command) {
         const { id } = command;
@@ -36,7 +40,13 @@ let DeleteArcHandler = class DeleteArcHandler {
         if (arcWithIslands?.islands && arcWithIslands.islands.length > 0) {
             throw new common_1.BadRequestException('Não é possível deletar um arco que possui ilhas vinculadas');
         }
-        await arc.destroy();
+        await this.sequelize.transaction(async (t) => {
+            await this.arcCharacterVersionModel.destroy({
+                where: { arc_id: id },
+                transaction: t,
+            });
+            await arc.destroy({ transaction: t });
+        });
     }
 };
 exports.DeleteArcHandler = DeleteArcHandler;
@@ -44,6 +54,7 @@ exports.DeleteArcHandler = DeleteArcHandler = __decorate([
     (0, cqrs_1.CommandHandler)(delete_arc_command_1.DeleteArcCommand),
     __param(0, (0, sequelize_1.InjectModel)(arc_model_1.Arc)),
     __param(1, (0, sequelize_1.InjectModel)(island_model_1.Island)),
-    __metadata("design:paramtypes", [Object, Object])
+    __param(2, (0, sequelize_1.InjectModel)(arc_character_version_model_1.ArcCharacterVersion)),
+    __metadata("design:paramtypes", [Object, Object, Object, sequelize_typescript_1.Sequelize])
 ], DeleteArcHandler);
 //# sourceMappingURL=delete-arc.handler.js.map

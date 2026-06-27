@@ -14,6 +14,8 @@ const sequelize_typescript_1 = require("sequelize-typescript");
 const character_model_1 = require("../../characters/models/character.model");
 const arc_model_1 = require("../../arcs/models/arc.model");
 const arc_character_version_model_1 = require("../../arcs/models/arc-character-version.model");
+const event_model_1 = require("../../events/models/event.model");
+const event_participant_model_1 = require("../../events/models/event-participant.model");
 let CharacterVersion = class CharacterVersion extends sequelize_typescript_1.Model {
 };
 exports.CharacterVersion = CharacterVersion;
@@ -37,6 +39,10 @@ __decorate([
     (0, sequelize_typescript_1.BelongsToMany)(() => arc_model_1.Arc, () => arc_character_version_model_1.ArcCharacterVersion),
     __metadata("design:type", Array)
 ], CharacterVersion.prototype, "arcs", void 0);
+__decorate([
+    (0, sequelize_typescript_1.BelongsToMany)(() => event_model_1.Event, () => event_participant_model_1.EventParticipant),
+    __metadata("design:type", Array)
+], CharacterVersion.prototype, "events", void 0);
 __decorate([
     (0, sequelize_typescript_1.AllowNull)(true),
     (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING),

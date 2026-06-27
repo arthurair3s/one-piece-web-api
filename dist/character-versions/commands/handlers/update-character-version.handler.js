@@ -41,25 +41,44 @@ let UpdateCharacterVersionHandler = class UpdateCharacterVersionHandler {
                 throw new common_1.NotFoundException(`Personagem com ID ${character_id} não encontrado`);
             }
         }
-        return this.sequelize.transaction(async (t) => {
-            await version.update({ character_id, ...updateData }, { transaction: t });
-            if (arc_ids !== undefined) {
-                await this.pivotModel.destroy({
-                    where: { character_version_id: id },
-                    transaction: t
-                });
-                if (arc_ids.length > 0) {
-                    const pivots = arc_ids.map(arc_id => ({
-                        arc_id,
-                        character_version_id: id,
-                        character_id: character_id ?? version.character_id,
-                        order: 0
-                    }));
-                    await this.pivotModel.bulkCreate(pivots, { transaction: t });
+        try {
+            return await this.sequelize.transaction(async (t) => {
+                await version.update({ character_id, ...updateData }, { transaction: t });
+                if (arc_ids !== undefined) {
+                    const existingPivots = await this.pivotModel.findAll({
+                        where: { character_version_id: id },
+                        transaction: t
+                    });
+                    const existingArcIds = existingPivots.map(p => p.arc_id);
+                    const toAdd = arc_ids.filter(id => !existingArcIds.includes(id));
+                    const toRemove = existingArcIds.filter(id => !arc_ids.includes(id));
+                    if (toRemove.length > 0) {
+                        await this.pivotModel.destroy({
+                            where: {
+                                character_version_id: id,
+                                arc_id: toRemove
+                            },
+                            transaction: t
+                        });
+                    }
+                    if (toAdd.length > 0) {
+                        const pivots = toAdd.map(arc_id => ({
+                            arc_id,
+                            character_version_id: id,
+                            character_id: character_id ?? version.character_id,
+                            order: 0
+                        }));
+                        await this.pivotModel.bulkCreate(pivots, { transaction: t });
+                    }
                 }
+            });
+        }
+        catch (error) {
+            if (error.name === 'SequelizeUniqueConstraintError') {
+                throw new common_1.BadRequestException('Este personagem já possui outra versão vinculada a um dos arcos selecionados. Um personagem não pode aparecer duas vezes no mesmo arco.');
             }
-            return version;
-        });
+            throw error;
+        }
     }
 };
 exports.UpdateCharacterVersionHandler = UpdateCharacterVersionHandler;

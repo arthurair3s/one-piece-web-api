@@ -16,18 +16,34 @@ exports.DeleteCharacterVersionHandler = void 0;
 const cqrs_1 = require("@nestjs/cqrs");
 const sequelize_1 = require("@nestjs/sequelize");
 const common_1 = require("@nestjs/common");
+const sequelize_typescript_1 = require("sequelize-typescript");
 const delete_character_version_command_1 = require("../impl/delete-character-version.command");
 const character_version_model_1 = require("../../models/character-version.model");
+const arc_character_version_model_1 = require("../../../arcs/models/arc-character-version.model");
+const event_participant_model_1 = require("../../../events/models/event-participant.model");
 let DeleteCharacterVersionHandler = class DeleteCharacterVersionHandler {
-    constructor(characterVersionModel) {
+    constructor(characterVersionModel, arcCharacterVersionModel, eventParticipantModel, sequelize) {
         this.characterVersionModel = characterVersionModel;
+        this.arcCharacterVersionModel = arcCharacterVersionModel;
+        this.eventParticipantModel = eventParticipantModel;
+        this.sequelize = sequelize;
     }
     async execute(command) {
         const version = await this.characterVersionModel.findByPk(command.id);
         if (!version) {
             throw new common_1.NotFoundException(`CharacterVersion com ID ${command.id} não encontrada`);
         }
-        await version.destroy();
+        await this.sequelize.transaction(async (t) => {
+            await this.arcCharacterVersionModel.destroy({
+                where: { character_version_id: command.id },
+                transaction: t,
+            });
+            await this.eventParticipantModel.destroy({
+                where: { character_version_id: command.id },
+                transaction: t,
+            });
+            await version.destroy({ transaction: t });
+        });
         return { success: true, message: `CharacterVersion com ID ${command.id} foi removida com sucesso` };
     }
 };
@@ -35,6 +51,8 @@ exports.DeleteCharacterVersionHandler = DeleteCharacterVersionHandler;
 exports.DeleteCharacterVersionHandler = DeleteCharacterVersionHandler = __decorate([
     (0, cqrs_1.CommandHandler)(delete_character_version_command_1.DeleteCharacterVersionCommand),
     __param(0, (0, sequelize_1.InjectModel)(character_version_model_1.CharacterVersion)),
-    __metadata("design:paramtypes", [Object])
+    __param(1, (0, sequelize_1.InjectModel)(arc_character_version_model_1.ArcCharacterVersion)),
+    __param(2, (0, sequelize_1.InjectModel)(event_participant_model_1.EventParticipant)),
+    __metadata("design:paramtypes", [Object, Object, Object, sequelize_typescript_1.Sequelize])
 ], DeleteCharacterVersionHandler);
 //# sourceMappingURL=delete-character-version.handler.js.map

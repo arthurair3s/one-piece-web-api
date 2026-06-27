@@ -10,5 +10,5 @@ export declare class UpdateCharacterVersionHandler implements ICommandHandler<Up
     private readonly pivotModel;
     private readonly sequelize;
     constructor(characterVersionModel: typeof CharacterVersion, characterModel: typeof Character, pivotModel: typeof ArcCharacterVersion, sequelize: Sequelize);
-    execute(command: UpdateCharacterVersionCommand): Promise<CharacterVersion>;
+    execute(command: UpdateCharacterVersionCommand): Promise<void>;
 }

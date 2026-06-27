@@ -12,6 +12,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CharacterVersionRead = void 0;
 const sequelize_typescript_1 = require("sequelize-typescript");
 const character_read_model_1 = require("../../characters/models/character-read.model");
+const arc_read_model_1 = require("../../arcs/models/arc-read.model");
+const arc_character_version_read_model_1 = require("../../arcs/models/arc-character-version-read.model");
+const event_read_model_1 = require("../../events/models/event-read.model");
+const event_participant_read_model_1 = require("../../events/models/event-participant-read.model");
 let CharacterVersionRead = class CharacterVersionRead extends sequelize_typescript_1.Model {
 };
 exports.CharacterVersionRead = CharacterVersionRead;
@@ -59,6 +63,14 @@ __decorate([
     (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.TEXT, allowNull: true }),
     __metadata("design:type", String)
 ], CharacterVersionRead.prototype, "description", void 0);
+__decorate([
+    (0, sequelize_typescript_1.BelongsToMany)(() => arc_read_model_1.ArcRead, { through: () => arc_character_version_read_model_1.ArcCharacterVersionRead, foreignKey: 'character_version_id', otherKey: 'arc_id', constraints: false }),
+    __metadata("design:type", Array)
+], CharacterVersionRead.prototype, "arcs", void 0);
+__decorate([
+    (0, sequelize_typescript_1.BelongsToMany)(() => event_read_model_1.EventRead, { through: () => event_participant_read_model_1.EventParticipantRead, foreignKey: 'character_version_id', otherKey: 'event_id', constraints: false }),
+    __metadata("design:type", Array)
+], CharacterVersionRead.prototype, "events", void 0);
 exports.CharacterVersionRead = CharacterVersionRead = __decorate([
     (0, sequelize_typescript_1.Table)({ tableName: 'character_versions', timestamps: true, paranoid: true })
 ], CharacterVersionRead);

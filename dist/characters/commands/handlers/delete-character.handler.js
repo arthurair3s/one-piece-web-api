@@ -18,14 +18,22 @@ const sequelize_1 = require("@nestjs/sequelize");
 const common_1 = require("@nestjs/common");
 const delete_character_command_1 = require("../impl/delete-character.command");
 const character_model_1 = require("../../models/character.model");
+const character_version_model_1 = require("../../../character-versions/models/character-version.model");
 let DeleteCharacterHandler = class DeleteCharacterHandler {
-    constructor(characterModel) {
+    constructor(characterModel, characterVersionModel) {
         this.characterModel = characterModel;
+        this.characterVersionModel = characterVersionModel;
     }
     async execute(command) {
         const character = await this.characterModel.findByPk(command.id);
         if (!character) {
             throw new common_1.NotFoundException(`Character com ID ${command.id} não encontrado`);
+        }
+        const versions = await this.characterVersionModel.findOne({
+            where: { character_id: command.id }
+        });
+        if (versions) {
+            throw new common_1.BadRequestException('Não é possível deletar um personagem que possui versões vinculadas');
         }
         await character.destroy();
         return { success: true, message: `Character com ID ${command.id} foi removido com sucesso` };
@@ -35,6 +43,7 @@ exports.DeleteCharacterHandler = DeleteCharacterHandler;
 exports.DeleteCharacterHandler = DeleteCharacterHandler = __decorate([
     (0, cqrs_1.CommandHandler)(delete_character_command_1.DeleteCharacterCommand),
     __param(0, (0, sequelize_1.InjectModel)(character_model_1.Character)),
-    __metadata("design:paramtypes", [Object])
+    __param(1, (0, sequelize_1.InjectModel)(character_version_model_1.CharacterVersion)),
+    __metadata("design:paramtypes", [Object, Object])
 ], DeleteCharacterHandler);
 //# sourceMappingURL=delete-character.handler.js.map

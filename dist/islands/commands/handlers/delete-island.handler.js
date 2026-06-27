@@ -18,9 +18,13 @@ const sequelize_1 = require("@nestjs/sequelize");
 const common_1 = require("@nestjs/common");
 const delete_island_command_1 = require("../impl/delete-island.command");
 const island_model_1 = require("../../models/island.model");
+const arc_island_model_1 = require("../../../arcs/models/arc-island.model");
+const sequelize_typescript_1 = require("sequelize-typescript");
 let DeleteIslandHandler = class DeleteIslandHandler {
-    constructor(islandModel) {
+    constructor(islandModel, arcIslandModel, sequelize) {
         this.islandModel = islandModel;
+        this.arcIslandModel = arcIslandModel;
+        this.sequelize = sequelize;
     }
     async execute(command) {
         const { id } = command;
@@ -28,13 +32,20 @@ let DeleteIslandHandler = class DeleteIslandHandler {
         if (!island) {
             throw new common_1.NotFoundException('Island não encontrada');
         }
-        await island.destroy();
+        await this.sequelize.transaction(async (t) => {
+            await this.arcIslandModel.destroy({
+                where: { island_id: id },
+                transaction: t,
+            });
+            await island.destroy({ transaction: t });
+        });
     }
 };
 exports.DeleteIslandHandler = DeleteIslandHandler;
 exports.DeleteIslandHandler = DeleteIslandHandler = __decorate([
     (0, cqrs_1.CommandHandler)(delete_island_command_1.DeleteIslandCommand),
     __param(0, (0, sequelize_1.InjectModel)(island_model_1.Island)),
-    __metadata("design:paramtypes", [Object])
+    __param(1, (0, sequelize_1.InjectModel)(arc_island_model_1.ArcIsland)),
+    __metadata("design:paramtypes", [Object, Object, sequelize_typescript_1.Sequelize])
 ], DeleteIslandHandler);
 //# sourceMappingURL=delete-island.handler.js.map

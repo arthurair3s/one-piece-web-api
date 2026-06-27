@@ -23,9 +23,9 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateCharacterVersionDto.prototype, "character_id", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: [1, 2], description: 'IDs dos arcos onde esta versão é válida', isArray: true }),
+    (0, swagger_1.ApiProperty)({ example: [1, 2], description: 'IDs dos arcos onde esta versão é válida (opcional no momento da criação)', isArray: true }),
     (0, class_validator_1.IsInt)({ each: true }),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], CreateCharacterVersionDto.prototype, "arc_ids", void 0);
 __decorate([
