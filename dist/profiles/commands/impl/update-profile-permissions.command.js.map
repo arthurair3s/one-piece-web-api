@@ -1,1 +1,0 @@
-{"version":3,"file":"update-profile-permissions.command.js","sourceRoot":"","sources":["../../../../src/profiles/commands/impl/update-profile-permissions.command.ts"],"names":[],"mappings":";;;AAEA,MAAa,+BAA+B;IAC1C,YACkB,SAAiB,EACjB,IAAiC;QADjC,cAAS,GAAT,SAAS,CAAQ;QACjB,SAAI,GAAJ,IAAI,CAA6B;IAC/C,CAAC;CACN;AALD,0EAKC"}

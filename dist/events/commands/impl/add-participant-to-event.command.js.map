@@ -1,1 +1,0 @@
-{"version":3,"file":"add-participant-to-event.command.js","sourceRoot":"","sources":["../../../../src/events/commands/impl/add-participant-to-event.command.ts"],"names":[],"mappings":";;;AAAA,MAAa,4BAA4B;IACvC,YACkB,QAAgB,EAChB,oBAA4B;QAD5B,aAAQ,GAAR,QAAQ,CAAQ;QAChB,yBAAoB,GAApB,oBAAoB,CAAQ;IAC3C,CAAC;CACL;AALD,oEAKC"}

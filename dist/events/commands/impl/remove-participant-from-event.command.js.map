@@ -1,1 +1,0 @@
-{"version":3,"file":"remove-participant-from-event.command.js","sourceRoot":"","sources":["../../../../src/events/commands/impl/remove-participant-from-event.command.ts"],"names":[],"mappings":";;;AAAA,MAAa,iCAAiC;IAC5C,YACkB,QAAgB,EAChB,oBAA4B;QAD5B,aAAQ,GAAR,QAAQ,CAAQ;QAChB,yBAAoB,GAApB,oBAAoB,CAAQ;IAC3C,CAAC;CACL;AALD,8EAKC"}
