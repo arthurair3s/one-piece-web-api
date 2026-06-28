@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { CdcController } from './cdc.controller';
 import { CdcService } from './cdc.service';
+import { CdcBypassService } from './cdc-bypass.service';
 import { EventRead } from '../events/models/event-read.model';
 import { EventParticipantRead } from '../events/models/event-participant-read.model';
 import { CharacterVersionRead } from '../character-versions/models/character-version-read.model';
@@ -11,8 +12,6 @@ import { ArcRead } from '../arcs/models/arc-read.model';
 import { ArcIslandRead } from '../arcs/models/arc-island-read.model';
 import { ArcCharacterVersionRead } from '../arcs/models/arc-character-version-read.model';
 import { SagaRead } from '../sagas/models/saga-read.model';
-import { CdcBypassService } from './cdc-bypass.service';
-
 @Module({
   imports: [
     SequelizeModule.forFeature([

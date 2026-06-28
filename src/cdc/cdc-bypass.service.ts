@@ -2,7 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { CdcService } from './cdc.service';
 
-// Modelos de Escrita (para hooks)
+// Modelos de Escrita (para hooks e leitura)
 import { Saga } from '../sagas/models/saga.model';
 import { Island } from '../islands/models/island.model';
 import { Arc } from '../arcs/models/arc.model';
@@ -13,9 +13,15 @@ import { ArcCharacterVersion } from '../arcs/models/arc-character-version.model'
 import { Event } from '../events/models/event.model';
 import { EventParticipant } from '../events/models/event-participant.model';
 
-// Modelos de Leitura (para bulk deletion)
+// Modelos de Leitura (para bulk insert/update e deletion)
+import { SagaRead } from '../sagas/models/saga-read.model';
+import { ArcRead } from '../arcs/models/arc-read.model';
+import { IslandRead } from '../islands/models/island-read.model';
 import { ArcIslandRead } from '../arcs/models/arc-island-read.model';
+import { CharacterRead } from '../characters/models/character-read.model';
+import { CharacterVersionRead } from '../character-versions/models/character-version-read.model';
 import { ArcCharacterVersionRead } from '../arcs/models/arc-character-version-read.model';
+import { EventRead } from '../events/models/event-read.model';
 import { EventParticipantRead } from '../events/models/event-participant-read.model';
 
 @Injectable()
@@ -24,15 +30,27 @@ export class CdcBypassService implements OnModuleInit {
 
   constructor(
     private readonly cdcService: CdcService,
+    @InjectModel(SagaRead, 'read-db')
+    private readonly sagaReadModel: typeof SagaRead,
+    @InjectModel(ArcRead, 'read-db')
+    private readonly arcReadModel: typeof ArcRead,
+    @InjectModel(IslandRead, 'read-db')
+    private readonly islandReadModel: typeof IslandRead,
     @InjectModel(ArcIslandRead, 'read-db')
     private readonly arcIslandReadModel: typeof ArcIslandRead,
+    @InjectModel(CharacterRead, 'read-db')
+    private readonly characterReadModel: typeof CharacterRead,
+    @InjectModel(CharacterVersionRead, 'read-db')
+    private readonly characterVersionReadModel: typeof CharacterVersionRead,
     @InjectModel(ArcCharacterVersionRead, 'read-db')
     private readonly arcCharacterVersionReadModel: typeof ArcCharacterVersionRead,
+    @InjectModel(EventRead, 'read-db')
+    private readonly eventReadModel: typeof EventRead,
     @InjectModel(EventParticipantRead, 'read-db')
     private readonly eventParticipantReadModel: typeof EventParticipantRead,
   ) {}
 
-  onModuleInit() {
+  async onModuleInit() {
     if (process.env.BYPASS_CDC !== 'true') {
       this.logger.log('Bypass de CDC inativo (modo de produção desativado ou executando localmente com Kafka).');
       return;
@@ -138,5 +156,123 @@ export class CdcBypassService implements OnModuleInit {
         }
       }
     });
+
+    // Executa a sincronização inicial
+    await this.syncAll();
+  }
+
+  async syncAll() {
+    this.logger.log('Iniciando sincronização programática do Read Model...');
+    try {
+      // 1. Sagas
+      const sagas = await Saga.findAll({ raw: true, paranoid: false });
+      if (sagas.length > 0) {
+        await this.sagaReadModel.bulkCreate(sagas as any[], {
+          updateOnDuplicate: ['name', 'description', 'order', 'createdAt', 'updatedAt', 'deletedAt'],
+        });
+      }
+      this.logger.log(`Sincronizados ${sagas.length} Sagas.`);
+
+      // 2. Arcs
+      const arcs = await Arc.findAll({ raw: true, paranoid: false });
+      if (arcs.length > 0) {
+        await this.arcReadModel.bulkCreate(arcs as any[], {
+          updateOnDuplicate: ['name', 'description', 'saga_id', 'order', 'createdAt', 'updatedAt', 'deletedAt'],
+        });
+      }
+      this.logger.log(`Sincronizados ${arcs.length} Arcs.`);
+
+      // 3. Islands
+      const islands = await Island.findAll({ raw: true, paranoid: false });
+      if (islands.length > 0) {
+        await this.islandReadModel.bulkCreate(islands as any[], {
+          updateOnDuplicate: [
+            'name',
+            'description',
+            'coordinate_x',
+            'coordinate_y',
+            'coordinate_z',
+            'rotation_y',
+            'scale',
+            'model_url',
+            'thumbnail_url',
+            'is_active',
+            'createdAt',
+            'updatedAt',
+            'deletedAt',
+          ],
+        });
+      }
+      this.logger.log(`Sincronizados ${islands.length} Islands.`);
+
+      // 4. ArcIslands
+      const arcIslands = await ArcIsland.findAll({ raw: true, paranoid: false });
+      if (arcIslands.length > 0) {
+        await this.arcIslandReadModel.bulkCreate(arcIslands as any[], {
+          updateOnDuplicate: ['arc_id', 'island_id', 'order', 'createdAt', 'updatedAt', 'deletedAt'],
+        });
+      }
+      this.logger.log(`Sincronizados ${arcIslands.length} ArcIslands.`);
+
+      // 5. Characters
+      const characters = await Character.findAll({ raw: true, paranoid: false });
+      if (characters.length > 0) {
+        await this.characterReadModel.bulkCreate(characters as any[], {
+          updateOnDuplicate: ['name', 'slug', 'createdAt', 'updatedAt', 'deletedAt'],
+        });
+      }
+      this.logger.log(`Sincronizados ${characters.length} Characters.`);
+
+      // 6. CharacterVersions
+      const characterVersions = await CharacterVersion.findAll({ raw: true, paranoid: false });
+      if (characterVersions.length > 0) {
+        await this.characterVersionReadModel.bulkCreate(characterVersions as any[], {
+          updateOnDuplicate: [
+            'character_id',
+            'alias',
+            'epithet',
+            'bounty',
+            'status',
+            'image_url',
+            'description',
+            'createdAt',
+            'updatedAt',
+            'deletedAt',
+          ],
+        });
+      }
+      this.logger.log(`Sincronizados ${characterVersions.length} CharacterVersions.`);
+
+      // 7. ArcCharacterVersions
+      const arcCharacterVersions = await ArcCharacterVersion.findAll({ raw: true, paranoid: false });
+      if (arcCharacterVersions.length > 0) {
+        await this.arcCharacterVersionReadModel.bulkCreate(arcCharacterVersions as any[], {
+          updateOnDuplicate: ['arc_id', 'character_version_id', 'character_id', 'order', 'createdAt', 'updatedAt', 'deletedAt'],
+        });
+      }
+      this.logger.log(`Sincronizados ${arcCharacterVersions.length} ArcCharacterVersions.`);
+
+      // 8. Events
+      const events = await Event.findAll({ raw: true, paranoid: false });
+      if (events.length > 0) {
+        await this.eventReadModel.bulkCreate(events as any[], {
+          updateOnDuplicate: ['arc_island_id', 'title', 'description', 'type', 'order', 'createdAt', 'updatedAt', 'deletedAt'],
+        });
+      }
+      this.logger.log(`Sincronizados ${events.length} Events.`);
+
+      // 9. EventParticipants
+      const eventParticipants = await EventParticipant.findAll({ raw: true, paranoid: false });
+      if (eventParticipants.length > 0) {
+        await this.eventParticipantReadModel.bulkCreate(eventParticipants as any[], {
+          updateOnDuplicate: ['event_id', 'character_version_id', 'createdAt', 'updatedAt', 'deletedAt'],
+        });
+      }
+      this.logger.log(`Sincronizados ${eventParticipants.length} EventParticipants.`);
+
+      this.logger.log('Sincronização programática concluída com sucesso!');
+    } catch (err: any) {
+      this.logger.error('Erro na sincronização automática do Read Model via Sequelize: ' + err.message, err.stack);
+    }
   }
 }

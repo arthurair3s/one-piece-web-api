@@ -6,7 +6,7 @@ module.exports = {
     await queryInterface.bulkInsert('profiles', [
       { id: 1, name: 'ADMIN', description: 'Acesso total ao sistema.', createdAt: new Date(), updatedAt: new Date() },
       { id: 2, name: 'PLAYER', description: 'Usuário padrão (apenas visualização).', createdAt: new Date(), updatedAt: new Date() },
-    ], { ignoreDuplicates: true });
+    ]);
 
     // 2. permissions (Definição de todos os slugs)
     const permissions = [
@@ -62,7 +62,7 @@ module.exports = {
       { id: 80, name: 'Acessar Wiki', slug: 'wiki.read' },
     ].map(p => ({ ...p, createdAt: new Date(), updatedAt: new Date() }));
 
-    await queryInterface.bulkInsert('permissions', permissions, { ignoreDuplicates: true });
+    await queryInterface.bulkInsert('permissions', permissions);
 
     // 3. profile_permissions (Vínculos)
     const adminPermissions = permissions.map(p => ({
@@ -86,7 +86,7 @@ module.exports = {
         updatedAt: new Date(),
       }));
 
-    await queryInterface.bulkInsert('profile_permissions', [...adminPermissions, ...playerPermissions], { ignoreDuplicates: true });
+    await queryInterface.bulkInsert('profile_permissions', [...adminPermissions, ...playerPermissions]);
 
     // 4. users
     await queryInterface.bulkInsert('users', [
@@ -108,7 +108,7 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date(),
       },
-    ], { ignoreDuplicates: true });
+    ]);
 
     // Sincronizar sequências (PostgreSQL) para evitar erro de ID duplicado após seed com IDs explícitos
     if (queryInterface.sequelize.options.dialect === 'postgres') {
