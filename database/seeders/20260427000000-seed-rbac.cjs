@@ -2,6 +2,12 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
+    // Limpar dados existentes antes de inserir para garantir idempotência
+    await queryInterface.bulkDelete('users', null, {});
+    await queryInterface.bulkDelete('profile_permissions', null, {});
+    await queryInterface.bulkDelete('permissions', null, {});
+    await queryInterface.bulkDelete('profiles', null, {});
+
     // 1. profiles
     await queryInterface.bulkInsert('profiles', [
       { id: 1, name: 'ADMIN', description: 'Acesso total ao sistema.', createdAt: new Date(), updatedAt: new Date() },
